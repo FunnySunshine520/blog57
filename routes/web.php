@@ -15,7 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('test', 'test@index');
+Route::get('api/test', 'test@index');
 
 
 $permissions = config('permissions');
@@ -38,3 +38,8 @@ foreach ($permissions as $key => $module) {
         });
     }
 }
+
+//Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+//Route::post('/login', 'Auth\LoginController@login')->name('login');

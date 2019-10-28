@@ -9,6 +9,6 @@ class test extends Controller
     //
     public function index()
     {
-        echo '123';
+        return '123';
     }
 }
