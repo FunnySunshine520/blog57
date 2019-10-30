@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\LoginTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -19,7 +21,7 @@ class LoginController extends Controller
     |
     */
 
-//    use AuthenticatesUsers;
+    use LoginTrait;
 
     /**
      * Where to redirect users after login.
@@ -40,10 +42,50 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $data = [
-            'name' => $request->get('name', 'name'),
-            'password' => $request->get('password', '123456'),
-        ];
-        return $data;
+        $this->validateLogin($request);
+
+        // 多个终端限制？
+        if (method_exists($this, 'hasTooManyLoginAttempts') &&
+            $this->hasTooManyLoginAttempts($request)) {
+            $this->fireLockoutEvent($request);
+
+            $this->sendLockoutResponse($request);
+        }
+
+        if ($this->attemptLogin($request)) {
+            $user = $this->guard()->user();
+
+            if ($user->active == 0) {
+                $this->incrementLoginAttempts($request);
+                abort(403, '账户已被冻结');
+            }
+//            var_dump($user);die;
+            return $this->sendLoginResponse($request);
+        }
+
+        $this->incrementLoginAttempts($request); // 增加用户的登录尝试
+
+        return $this->sendFailedLoginResponse($request);
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+//        $user->api_token = Str::random(64);
+//        $user->save();
+
+        return $this->success($user);
+    }
+
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        return $this->failed('账号密码错误, 请重新输入');
+    }
+
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'password' => 'required|string',
+        ]);
     }
 }

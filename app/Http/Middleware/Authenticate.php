@@ -22,24 +22,22 @@ class Authenticate
 //        dd($routeName);
 //        throw new \Exception(json_encode($routeName));
         // 如果未登录
-        var_dump(Auth::guard($guard)->guest());die;
+//        var_dump(Auth::guard($guard)->guest());die;
 
-        if (Auth::guard($guard)->guest()) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'code' => 401,
-                    'msg' => '您登录已过期，请重新登录。',
-    //                'redirect'=>url_login($refererHost),
-                ], 401);
-            } else {
-                return redirect('/');
-            }
-        }
+//        if (Auth::guard($guard)->guest()) {
+//            if ($request->ajax() || $request->wantsJson()) {
+//                return response()->json([
+//                    'code' => 401,
+//                    'msg' => '您登录已过期，请重新登录。',
+//    //                'redirect'=>url_login($refererHost),
+//                ], 401);
+//            } else {
+//                return redirect('/');
+//            }
+//        }
 
         $user = Auth::user();
-        $group = $user->groups()->first();
         app()->instance('user', $user);
-        app()->instance('region', array_get($group, 'region', '0'));
         // app()->instance('log-formats', Auth::user()->getLogFormats());
         // 如果已登录
         if (!$user->activated) {
